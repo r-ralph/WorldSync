@@ -20,12 +20,19 @@ import jp.mcedu.mincra.worldsync.listener.BlockBreakListener;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class WorldSync extends JavaPlugin {
+    private Config config;
+
     @Override
     public void onEnable() {
         // Config
         getConfig().options().copyDefaults(true);
         saveConfig();
         reloadConfig();
+
+        config = Config.load(getConfig());
+        getLogger().info("Redis configuration:");
+        getLogger().info("  Master: " + config.getMasterAddress());
+        getLogger().info("  Slave : " + config.getSlaveAddress());
 
         // Event Listener
         getServer().getPluginManager().registerEvents(new BlockBreakListener(this), this);
