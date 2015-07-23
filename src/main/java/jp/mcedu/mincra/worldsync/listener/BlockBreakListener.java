@@ -14,22 +14,23 @@
  * limitations under the License.
  */
 
-package jp.mcedu.mincra.worldsync;
+package jp.mcedu.mincra.worldsync.listener;
 
-import jp.mcedu.mincra.worldsync.listener.BlockBreakListener;
-import org.bukkit.plugin.java.JavaPlugin;
+import jp.mcedu.mincra.worldsync.WorldSync;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockBreakEvent;
 
-public class WorldSync extends JavaPlugin {
-    @Override
-    public void onEnable() {
-        // Config
-        getConfig().options().copyDefaults(true);
-        saveConfig();
-        reloadConfig();
+public class BlockBreakListener implements Listener {
+    private WorldSync plugin;
 
-        // Event Listener
-        getServer().getPluginManager().registerEvents(new BlockBreakListener(this), this);
+    public BlockBreakListener(WorldSync plugin) {
+        this.plugin = plugin;
+    }
 
-        getLogger().info("Enabled plugin successfully.");
+    @EventHandler
+    public void onBlockBreak(BlockBreakEvent event) {
+        plugin.getLogger().info("Block break");
     }
 }
