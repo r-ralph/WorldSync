@@ -1,0 +1,6 @@
+name: WorldSync
+main: jp.mcedu.mincra.worldsync.WorldSync
+version: 1.0-SNAPSHOT
+author: ralph
+# This is used so that we can automagically override default BungeeCord behavior.
+softDepends: []
