@@ -21,6 +21,8 @@ import org.bukkit.configuration.file.FileConfiguration;
 
 public class Config {
 
+    private int fetchInterval;
+
     private String masterAddress;
 
     private int masterPort;
@@ -37,15 +39,19 @@ public class Config {
 
     private String slavePassword;
 
+    private String tableName;
+
     private Config() {
 
     }
 
     public static Config load(FileConfiguration config) {
         Config c = new Config();
+        ConfigurationSection generic = config.getConfigurationSection("generic");
         ConfigurationSection redis = config.getConfigurationSection("redis");
         ConfigurationSection master = redis.getConfigurationSection("master");
         ConfigurationSection slave = redis.getConfigurationSection("slave");
+        c.fetchInterval = generic.getInt("fetch_interval");
         c.masterAddress = master.getString("address");
         c.masterPort = master.getInt("port");
         c.masterUsername = master.getString("username");
@@ -54,7 +60,12 @@ public class Config {
         c.slavePort = slave.getInt("port");
         c.slaveUsername = slave.getString("username");
         c.slavePassword = slave.getString("password");
+        c.tableName = redis.getString("table");
         return c;
+    }
+
+    public int getFetchInterval() {
+        return fetchInterval;
     }
 
     public String getMasterAddress() {
@@ -87,5 +98,9 @@ public class Config {
 
     public String getSlavePassword() {
         return slavePassword;
+    }
+
+    public String getTableName() {
+        return tableName;
     }
 }

@@ -73,8 +73,8 @@ public class WorldSync extends JavaPlugin {
     }
 
     private void initRedis() {
-        masterPool = new JedisPool(new JedisPoolConfig(), config.getMasterAddress());
-        slavePool = new JedisPool(new JedisPoolConfig(), config.getSlaveAddress());
+        masterPool = new JedisPool(new JedisPoolConfig(), config.getMasterAddress(), config.getMasterPort());
+        slavePool = new JedisPool(new JedisPoolConfig(), config.getSlaveAddress(), config.getSlavePort());
     }
 
     public JedisPool getMasterPool() {
@@ -87,5 +87,9 @@ public class WorldSync extends JavaPlugin {
 
     public ConcurrentLinkedQueue<JsonObject> getQueue() {
         return queue;
+    }
+
+    public Config getLocalConfig() {
+        return config;
     }
 }

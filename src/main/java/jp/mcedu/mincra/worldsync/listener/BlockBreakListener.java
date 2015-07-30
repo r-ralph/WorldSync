@@ -46,7 +46,7 @@ public class BlockBreakListener implements Listener {
         json.addProperty("m", block.getType().ordinal());
         String str = gson.toJson(json);
         try (Jedis jedis = plugin.getMasterPool().getResource()) {
-            jedis.rpush("block_l", str);
+            jedis.rpush(plugin.getLocalConfig().getTableName(), str);
         }
         plugin.getLogger().info("Block break : " + str);
     }

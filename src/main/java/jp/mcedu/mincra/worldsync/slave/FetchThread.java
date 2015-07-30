@@ -40,8 +40,8 @@ public class FetchThread extends Thread {
         Gson gson = new Gson();
         while (!stop.get()) {
             try (Jedis jedis = plugin.getSlavePool().getResource()) {
-                sleep(5000);
-                List<String> block_l = jedis.lrange("block_l", id, -1);
+                sleep(plugin.getLocalConfig().getFetchInterval());
+                List<String> block_l = jedis.lrange(plugin.getLocalConfig().getTableName(), id, -1);
                 for (String s : block_l) {
                     plugin.getLogger().info(s);
                     JsonObject data = gson.fromJson(s, JsonObject.class);
