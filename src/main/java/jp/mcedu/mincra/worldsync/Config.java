@@ -23,11 +23,15 @@ public class Config {
 
     private String masterAddress;
 
+    private int masterPort;
+
     private String masterUsername;
 
     private String masterPassword;
 
     private String slaveAddress;
+
+    private int slavePort;
 
     private String slaveUsername;
 
@@ -43,16 +47,22 @@ public class Config {
         ConfigurationSection master = redis.getConfigurationSection("master");
         ConfigurationSection slave = redis.getConfigurationSection("slave");
         c.masterAddress = master.getString("address");
+        c.masterPort = master.getInt("port");
         c.masterUsername = master.getString("username");
         c.masterPassword = master.getString("password");
-        c.slaveAddress = master.getString("address");
-        c.slaveUsername = master.getString("username");
-        c.slavePassword = master.getString("password");
+        c.slaveAddress = slave.getString("address");
+        c.slavePort = slave.getInt("port");
+        c.slaveUsername = slave.getString("username");
+        c.slavePassword = slave.getString("password");
         return c;
     }
 
     public String getMasterAddress() {
         return masterAddress;
+    }
+
+    public int getMasterPort() {
+        return masterPort;
     }
 
     public String getMasterUsername() {
@@ -65,6 +75,10 @@ public class Config {
 
     public String getSlaveAddress() {
         return slaveAddress;
+    }
+
+    public int getSlavePort() {
+        return slavePort;
     }
 
     public String getSlaveUsername() {

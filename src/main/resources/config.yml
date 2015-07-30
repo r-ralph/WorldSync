@@ -1,9 +1,11 @@
 redis:
  master:
   address: 192.168.11.10:1234
+  port: 6379
   username:
   password:
  slave:
   address: 192.168.11.10:1234
+  port: 6379
   username:
   password:

@@ -16,11 +16,24 @@
 
 package jp.mcedu.mincra.worldsync;
 
+import com.google.gson.JsonObject;
 import jp.mcedu.mincra.worldsync.listener.BlockBreakListener;
+import jp.mcedu.mincra.worldsync.slave.FetchThread;
+import jp.mcedu.mincra.worldsync.slave.WorldApply;
+import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitScheduler;
+import redis.clients.jedis.JedisPool;
+import redis.clients.jedis.JedisPoolConfig;
+
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class WorldSync extends JavaPlugin {
     private Config config;
+    private JedisPool masterPool;
+    private JedisPool slavePool;
+    private FetchThread fetchThread;
+    private ConcurrentLinkedQueue<JsonObject> queue;
 
     @Override
     public void onEnable() {
@@ -34,9 +47,45 @@ public class WorldSync extends JavaPlugin {
         getLogger().info("  Master: " + config.getMasterAddress());
         getLogger().info("  Slave : " + config.getSlaveAddress());
 
+        // Objects initialize
+        queue = new ConcurrentLinkedQueue<>();
+
+        initRedis();
+
         // Event Listener
         getServer().getPluginManager().registerEvents(new BlockBreakListener(this), this);
 
+        // Slave scan thread
+        fetchThread = new FetchThread(this);
+        fetchThread.start();
+
+        BukkitScheduler scheduler = Bukkit.getServer().getScheduler();
+        scheduler.scheduleSyncRepeatingTask(this, new WorldApply(this), 0L, 10L);
+
         getLogger().info("Enabled plugin successfully.");
+    }
+
+    @Override
+    public void onDisable() {
+        super.onDisable();
+        masterPool.destroy();
+        fetchThread.stopThread();
+    }
+
+    private void initRedis() {
+        masterPool = new JedisPool(new JedisPoolConfig(), config.getMasterAddress());
+        slavePool = new JedisPool(new JedisPoolConfig(), config.getSlaveAddress());
+    }
+
+    public JedisPool getMasterPool() {
+        return masterPool;
+    }
+
+    public JedisPool getSlavePool() {
+        return slavePool;
+    }
+
+    public ConcurrentLinkedQueue<JsonObject> getQueue() {
+        return queue;
     }
 }

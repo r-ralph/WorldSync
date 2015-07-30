@@ -16,11 +16,14 @@
 
 package jp.mcedu.mincra.worldsync.listener;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import jp.mcedu.mincra.worldsync.WorldSync;
-import org.bukkit.entity.Player;
+import org.bukkit.block.Block;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
+import redis.clients.jedis.Jedis;
 
 public class BlockBreakListener implements Listener {
     private WorldSync plugin;
@@ -31,6 +34,20 @@ public class BlockBreakListener implements Listener {
 
     @EventHandler
     public void onBlockBreak(BlockBreakEvent event) {
-        plugin.getLogger().info("Block break");
+        Block block = event.getBlock();
+        Gson gson = new Gson();
+        // Store block info
+        // TODO: Add metadata if target block has
+        JsonObject json = new JsonObject();
+        json.addProperty("t", 0);
+        json.addProperty("x", block.getX());
+        json.addProperty("y", block.getY());
+        json.addProperty("z", block.getZ());
+        json.addProperty("m", block.getType().ordinal());
+        String str = gson.toJson(json);
+        try (Jedis jedis = plugin.getMasterPool().getResource()) {
+            jedis.rpush("block_l", str);
+        }
+        plugin.getLogger().info("Block break : " + str);
     }
 }
