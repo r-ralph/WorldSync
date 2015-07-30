@@ -52,15 +52,20 @@ public class FetchThread extends Thread {
                 e.printStackTrace();
             }
         }
+        try {
+            sleep(100);
+        } catch (InterruptedException ignored) {
+        }
         notifyAll();
     }
 
-    public void stopThread() {
+    public synchronized void stopThread() {
+        plugin.getLogger().info("Stopping fetch thread...");
         stop.set(true);
         try {
-            this.wait();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+            this.wait(1000);
+            plugin.getLogger().info("Stopped fetch thread successfully!");
+        } catch (InterruptedException ignored) {
         }
     }
 }

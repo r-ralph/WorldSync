@@ -70,6 +70,7 @@ public class WorldSync extends JavaPlugin {
         super.onDisable();
         masterPool.destroy();
         fetchThread.stopThread();
+        getLogger().info("Disabled plugin successfully.");
     }
 
     private void initRedis() {
