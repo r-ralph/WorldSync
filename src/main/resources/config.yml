@@ -2,12 +2,12 @@ generic:
  fetch_interval: 5000
 redis:
  master:
-  address: 192.168.11.10:1234
+  address: 192.168.11.10
   port: 6379
   username:
   password:
  slave:
-  address: 192.168.11.10:1234
+  address: 192.168.11.10
   port: 6379
   username:
   password:
