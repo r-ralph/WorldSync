@@ -17,7 +17,7 @@
 package jp.mcedu.mincra.worldsync;
 
 import com.google.gson.JsonObject;
-import jp.mcedu.mincra.worldsync.listener.BlockBreakListener;
+import jp.mcedu.mincra.worldsync.listener.BlockListener;
 import jp.mcedu.mincra.worldsync.slave.FetchThread;
 import jp.mcedu.mincra.worldsync.slave.WorldApply;
 import org.bukkit.Bukkit;
@@ -53,7 +53,7 @@ public class WorldSync extends JavaPlugin {
         initRedis();
 
         // Event Listener
-        getServer().getPluginManager().registerEvents(new BlockBreakListener(this), this);
+        getServer().getPluginManager().registerEvents(new BlockListener(this), this);
 
         // Slave scan thread
         fetchThread = new FetchThread(this);

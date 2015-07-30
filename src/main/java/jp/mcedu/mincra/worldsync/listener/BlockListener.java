@@ -23,12 +23,13 @@ import org.bukkit.block.Block;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
 import redis.clients.jedis.Jedis;
 
-public class BlockBreakListener implements Listener {
+public class BlockListener implements Listener {
     private WorldSync plugin;
 
-    public BlockBreakListener(WorldSync plugin) {
+    public BlockListener(WorldSync plugin) {
         this.plugin = plugin;
     }
 
@@ -37,17 +38,34 @@ public class BlockBreakListener implements Listener {
         Block block = event.getBlock();
         Gson gson = new Gson();
         // Store block info
-        // TODO: Add metadata if target block has
         JsonObject json = new JsonObject();
-        json.addProperty("t", 0);
-        json.addProperty("x", block.getX());
-        json.addProperty("y", block.getY());
-        json.addProperty("z", block.getZ());
-        json.addProperty("m", block.getType().ordinal());
+        json.addProperty("t", 0);                           // type
+        json.addProperty("x", block.getX());                // x
+        json.addProperty("y", block.getY());                // y
+        json.addProperty("z", block.getZ());                // z
         String str = gson.toJson(json);
         try (Jedis jedis = plugin.getMasterPool().getResource()) {
             jedis.rpush(plugin.getLocalConfig().getTableName(), str);
         }
         plugin.getLogger().info("Block break : " + str);
+    }
+
+    @EventHandler
+    public void onBlockPlace(BlockPlaceEvent event) {
+        Block block = event.getBlock();
+        Gson gson = new Gson();
+        // Store block info
+        // TODO: Add metadata if target block has
+        JsonObject json = new JsonObject();
+        json.addProperty("t", 1);                           // type
+        json.addProperty("x", block.getX());                // x
+        json.addProperty("y", block.getY());                // y
+        json.addProperty("z", block.getZ());                // z
+        json.addProperty("m", block.getType().ordinal());   // material
+        String str = gson.toJson(json);
+        try (Jedis jedis = plugin.getMasterPool().getResource()) {
+            jedis.rpush(plugin.getLocalConfig().getTableName(), str);
+        }
+        plugin.getLogger().info("Block place : " + str);
     }
 }

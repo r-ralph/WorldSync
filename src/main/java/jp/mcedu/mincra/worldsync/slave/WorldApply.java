@@ -35,10 +35,31 @@ public class WorldApply implements Runnable {
             if (data == null) {
                 return;
             }
-            int x = data.get("x").getAsInt();
-            int y = data.get("y").getAsInt();
-            int z = data.get("z").getAsInt();
-            Bukkit.getServer().getWorld("world").getBlockAt(x, y + 1, z).setType(Material.AIR);
+            switch (data.get("t").getAsInt()) {
+                case 0: // break
+                    onBreak(data);
+                    break;
+                case 1: // place
+                    onPlace(data);
+                    break;
+                default:
+                    break;
+            }
+
         }
+    }
+
+    public void onBreak(JsonObject data) {
+        int x = data.get("x").getAsInt();
+        int y = data.get("y").getAsInt();
+        int z = data.get("z").getAsInt();
+        Bukkit.getServer().getWorld("world").getBlockAt(x, y + 1, z).setType(Material.AIR);
+    }
+
+    public void onPlace(JsonObject data) {
+        int x = data.get("x").getAsInt();
+        int y = data.get("y").getAsInt();
+        int z = data.get("z").getAsInt();
+        Bukkit.getServer().getWorld("world").getBlockAt(x, y + 1, z).setType(Material.AIR);
     }
 }
