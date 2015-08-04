@@ -27,15 +27,11 @@ public class Config {
 
     private int masterPort;
 
-    private String masterUsername;
-
     private String masterPassword;
 
     private String slaveAddress;
 
     private int slavePort;
-
-    private String slaveUsername;
 
     private String slavePassword;
 
@@ -54,12 +50,10 @@ public class Config {
         c.fetchInterval = generic.getInt("fetch_interval");
         c.masterAddress = master.getString("address");
         c.masterPort = master.getInt("port");
-        c.masterUsername = master.getString("username");
-        c.masterPassword = master.getString("password");
+        c.masterPassword = master.getString("password", null);
         c.slaveAddress = slave.getString("address");
         c.slavePort = slave.getInt("port");
-        c.slaveUsername = slave.getString("username");
-        c.slavePassword = slave.getString("password");
+        c.slavePassword = slave.getString("password", null);
         c.tableName = redis.getString("table");
         return c;
     }
@@ -76,10 +70,6 @@ public class Config {
         return masterPort;
     }
 
-    public String getMasterUsername() {
-        return masterUsername;
-    }
-
     public String getMasterPassword() {
         return masterPassword;
     }
@@ -90,10 +80,6 @@ public class Config {
 
     public int getSlavePort() {
         return slavePort;
-    }
-
-    public String getSlaveUsername() {
-        return slaveUsername;
     }
 
     public String getSlavePassword() {
