@@ -45,8 +45,8 @@ public class WorldSync extends JavaPlugin {
 
         config = Config.load(getConfig());
         getLogger().info("Redis configuration:");
-        getLogger().info("  Master: " + config.getMasterAddress());
-        getLogger().info("  Slave : " + config.getSlaveAddress());
+        getLogger().info("  Master: " + config.getMasterAddress() + ":" + config.getMasterPort());
+        getLogger().info("  Slave : " + config.getSlaveAddress() + ":" + config.getSlavePort());
 
         // Objects initialize
         queue = new ConcurrentLinkedQueue<>();
