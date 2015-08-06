@@ -22,7 +22,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
-import org.bukkit.material.MaterialData;
 
 public class WorldApply implements Runnable {
     private WorldSync plugin;
@@ -48,7 +47,6 @@ public class WorldApply implements Runnable {
                 default:
                     break;
             }
-
         }
     }
 
@@ -70,7 +68,6 @@ public class WorldApply implements Runnable {
         byte metadata = data.get("d").getAsByte();
         plugin.getLogger().info("Placing block at (" + String.format("%d, %d, %d", x, y, z) + ") " + String.format("t: %d, d: %s", material, metadata));
         //noinspection deprecation
-        MaterialData materialData = new MaterialData(Material.values()[material], metadata);
         World world = Bukkit.getServer().getWorld("world");
         Block block = world.getBlockAt(x, y, z);
         //noinspection deprecation

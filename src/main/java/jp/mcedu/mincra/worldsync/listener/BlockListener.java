@@ -43,6 +43,7 @@ public class BlockListener implements Listener {
         json.addProperty("x", block.getX());                // x
         json.addProperty("y", block.getY());                // y
         json.addProperty("z", block.getZ());                // z
+        json.addProperty("n", event.getPlayer().getDisplayName());   // player name
         String str = gson.toJson(json);
         try (Jedis jedis = plugin.getMasterPool().getResource()) {
             jedis.rpush(plugin.getLocalConfig().getTableName(), str);
@@ -55,14 +56,16 @@ public class BlockListener implements Listener {
         Block block = event.getBlock();
         Gson gson = new Gson();
         // Store block info
-        // TODO: Add metadata if target block has
         JsonObject json = new JsonObject();
         json.addProperty("t", 1);                           // type
         json.addProperty("x", block.getX());                // x
         json.addProperty("y", block.getY());                // y
         json.addProperty("z", block.getZ());                // z
         json.addProperty("m", block.getType().ordinal());   // material
+        //noinspection deprecation
         json.addProperty("d", block.getState().getData().getData()); // metadata
+        json.addProperty("n", event.getPlayer().getDisplayName());   // player name
+        // TODO: Store TileEntity or more optional data(e.g. Sign lines)
         String str = gson.toJson(json);
         try (Jedis jedis = plugin.getMasterPool().getResource()) {
             jedis.rpush(plugin.getLocalConfig().getTableName(), str);
