@@ -43,7 +43,6 @@ public class FetchThread extends Thread {
                 sleep(plugin.getLocalConfig().getFetchInterval());
                 List<String> block_l = jedis.lrange(plugin.getLocalConfig().getTableName(), id, -1);
                 for (String s : block_l) {
-                    plugin.getLogger().info(s);
                     JsonObject data = gson.fromJson(s, JsonObject.class);
                     plugin.getQueue().offer(data);
                 }

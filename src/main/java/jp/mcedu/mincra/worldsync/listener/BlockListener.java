@@ -62,6 +62,7 @@ public class BlockListener implements Listener {
         json.addProperty("y", block.getY());                // y
         json.addProperty("z", block.getZ());                // z
         json.addProperty("m", block.getType().ordinal());   // material
+        json.addProperty("d", block.getState().getData().getData()); // metadata
         String str = gson.toJson(json);
         try (Jedis jedis = plugin.getMasterPool().getResource()) {
             jedis.rpush(plugin.getLocalConfig().getTableName(), str);

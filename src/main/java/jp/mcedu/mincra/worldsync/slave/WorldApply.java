@@ -20,6 +20,9 @@ import com.google.gson.JsonObject;
 import jp.mcedu.mincra.worldsync.WorldSync;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.World;
+import org.bukkit.block.Block;
+import org.bukkit.material.MaterialData;
 
 public class WorldApply implements Runnable {
     private WorldSync plugin;
@@ -53,7 +56,10 @@ public class WorldApply implements Runnable {
         int x = data.get("x").getAsInt();
         int y = data.get("y").getAsInt();
         int z = data.get("z").getAsInt();
-        Bukkit.getServer().getWorld("world").getBlockAt(x, y, z).setType(Material.AIR);
+        plugin.getLogger().info("Breaking block at (" + String.format("%d, %d, %d", x, y, z) + ")");
+        World world = Bukkit.getServer().getWorld("world");
+        Block block = world.getBlockAt(x, y, z);
+        block.setType(Material.AIR);
     }
 
     public void onPlace(JsonObject data) {
@@ -61,6 +67,13 @@ public class WorldApply implements Runnable {
         int y = data.get("y").getAsInt();
         int z = data.get("z").getAsInt();
         int material = data.get("m").getAsInt();
-        Bukkit.getServer().getWorld("world").getBlockAt(x, y, z).setType(Material.values()[material]);
+        byte metadata = data.get("d").getAsByte();
+        plugin.getLogger().info("Placing block at (" + String.format("%d, %d, %d", x, y, z) + ") " + String.format("t: %d, d: %s", material, metadata));
+        //noinspection deprecation
+        MaterialData materialData = new MaterialData(Material.values()[material], metadata);
+        World world = Bukkit.getServer().getWorld("world");
+        Block block = world.getBlockAt(x, y, z);
+        //noinspection deprecation
+        block.setTypeIdAndData(material, metadata, true);
     }
 }
