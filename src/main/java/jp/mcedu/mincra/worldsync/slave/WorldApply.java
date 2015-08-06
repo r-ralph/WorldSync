@@ -17,11 +17,18 @@
 package jp.mcedu.mincra.worldsync.slave;
 
 import com.google.gson.JsonObject;
+import jp.mcedu.mincra.worldsync.Constants;
 import jp.mcedu.mincra.worldsync.WorldSync;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockState;
+import org.bukkit.block.Sign;
+
+import java.util.Arrays;
+
+import static jp.mcedu.mincra.worldsync.Constants.*;
 
 public class WorldApply implements Runnable {
     private WorldSync plugin;
@@ -38,11 +45,14 @@ public class WorldApply implements Runnable {
                 return;
             }
             switch (data.get("t").getAsInt()) {
-                case 0: // break
+                case COMMAND_BLOCK_BREAK:
                     onBreak(data);
                     break;
-                case 1: // place
+                case COMMAND_BLOCK_PLACE:
                     onPlace(data);
+                    break;
+                case COMMAND_SIGN_CHANGE:
+                    onSignChange(data);
                     break;
                 default:
                     break;
@@ -72,5 +82,39 @@ public class WorldApply implements Runnable {
         Block block = world.getBlockAt(x, y, z);
         //noinspection deprecation
         block.setTypeIdAndData(material, metadata, true);
+        parseOptional(block, material, data);
+    }
+
+    public void onSignChange(JsonObject data) {
+        int x = data.get("x").getAsInt();
+        int y = data.get("y").getAsInt();
+        int z = data.get("z").getAsInt();
+        plugin.getLogger().info("Changing sign at (" + String.format("%d, %d, %d", x, y, z) + ")");
+        World world = Bukkit.getServer().getWorld("world");
+        Block block = world.getBlockAt(x, y, z);
+        BlockState state = block.getState();
+        if (state instanceof Sign) {
+            Sign sign = ((Sign) state);
+            JsonObject lines = data.getAsJsonObject("o");
+            sign.setLine(0, lines.get("0").getAsString());
+            sign.setLine(1, lines.get("1").getAsString());
+            sign.setLine(2, lines.get("2").getAsString());
+            sign.setLine(3, lines.get("3").getAsString());
+            sign.update(true);
+        } else {
+            plugin.getLogger().severe("Expected sign at (" + String.format("%d, %d, %d", x, y, z) + ") but appears " + block.getClass().getName());
+        }
+    }
+
+    private void parseOptional(Block block, int type, JsonObject data) {
+        if (Arrays.binarySearch(Constants.OPTIONAL_TYPES, type) < 0) {
+            // Block hasn't optional data
+            return;
+        }
+        JsonObject optional = data.getAsJsonObject("o");
+        switch (type) {
+            default:
+                break;
+        }
     }
 }

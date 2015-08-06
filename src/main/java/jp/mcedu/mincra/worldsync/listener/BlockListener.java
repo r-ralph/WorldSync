@@ -18,13 +18,17 @@ package jp.mcedu.mincra.worldsync.listener;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import jp.mcedu.mincra.worldsync.Constants;
 import jp.mcedu.mincra.worldsync.WorldSync;
 import org.bukkit.block.Block;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.block.SignChangeEvent;
 import redis.clients.jedis.Jedis;
+
+import java.util.Arrays;
 
 public class BlockListener implements Listener {
     private WorldSync plugin;
@@ -39,10 +43,10 @@ public class BlockListener implements Listener {
         Gson gson = new Gson();
         // Store block info
         JsonObject json = new JsonObject();
-        json.addProperty("t", 0);                           // type
-        json.addProperty("x", block.getX());                // x
-        json.addProperty("y", block.getY());                // y
-        json.addProperty("z", block.getZ());                // z
+        json.addProperty("t", Constants.COMMAND_BLOCK_BREAK);   // type
+        json.addProperty("x", block.getX());                    // x
+        json.addProperty("y", block.getY());                    // y
+        json.addProperty("z", block.getZ());                    // z
         json.addProperty("n", event.getPlayer().getDisplayName());   // player name
         String str = gson.toJson(json);
         try (Jedis jedis = plugin.getMasterPool().getResource()) {
@@ -54,22 +58,66 @@ public class BlockListener implements Listener {
     @EventHandler
     public void onBlockPlace(BlockPlaceEvent event) {
         Block block = event.getBlock();
+        int type = block.getType().ordinal();
         Gson gson = new Gson();
         // Store block info
         JsonObject json = new JsonObject();
-        json.addProperty("t", 1);                           // type
-        json.addProperty("x", block.getX());                // x
-        json.addProperty("y", block.getY());                // y
-        json.addProperty("z", block.getZ());                // z
-        json.addProperty("m", block.getType().ordinal());   // material
+        json.addProperty("t", Constants.COMMAND_BLOCK_PLACE);   // type
+        json.addProperty("x", block.getX());                    // x
+        json.addProperty("y", block.getY());                    // y
+        json.addProperty("z", block.getZ());                    // z
+        json.addProperty("m", type);                            // material
         //noinspection deprecation
         json.addProperty("d", block.getState().getData().getData()); // metadata
         json.addProperty("n", event.getPlayer().getDisplayName());   // player name
-        // TODO: Store TileEntity or more optional data(e.g. Sign lines)
+        // Optional data
+        JsonObject optional = getOptional(block, type);
+        if (optional != null) {
+            json.add("o", optional);
+        }
         String str = gson.toJson(json);
         try (Jedis jedis = plugin.getMasterPool().getResource()) {
             jedis.rpush(plugin.getLocalConfig().getTableName(), str);
         }
         plugin.getLogger().info("Block place : " + str);
+    }
+
+    @EventHandler
+    public void onSignChange(SignChangeEvent event) {
+        Block block = event.getBlock();
+        Gson gson = new Gson();
+        // Store block info
+        JsonObject json = new JsonObject();
+        json.addProperty("t", Constants.COMMAND_SIGN_CHANGE);   // type
+        json.addProperty("x", block.getX());                    // x
+        json.addProperty("y", block.getY());                    // y
+        json.addProperty("z", block.getZ());                    // z
+
+        JsonObject lines = new JsonObject();                    // lines
+        lines.addProperty("0", event.getLine(0));
+        lines.addProperty("1", event.getLine(1));
+        lines.addProperty("2", event.getLine(2));
+        lines.addProperty("3", event.getLine(3));
+        json.add("o", lines);
+
+        String str = gson.toJson(json);
+        try (Jedis jedis = plugin.getMasterPool().getResource()) {
+            jedis.rpush(plugin.getLocalConfig().getTableName(), str);
+        }
+        plugin.getLogger().info("Sign change : " + str);
+    }
+
+    private JsonObject getOptional(Block block, int type) {
+        if (Arrays.binarySearch(Constants.OPTIONAL_TYPES, type) < 0) {
+            // Block hasn't optional data
+            return null;
+        }
+        JsonObject optional = new JsonObject();
+        switch (type) {
+            default:
+                optional = null;
+                break;
+        }
+        return optional;
     }
 }
