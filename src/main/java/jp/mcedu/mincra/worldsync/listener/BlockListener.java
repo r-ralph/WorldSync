@@ -20,12 +20,14 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import jp.mcedu.mincra.worldsync.Constants;
 import jp.mcedu.mincra.worldsync.WorldSync;
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.SignChangeEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import redis.clients.jedis.Jedis;
 
 import java.util.Arrays;
@@ -105,6 +107,27 @@ public class BlockListener implements Listener {
             jedis.rpush(plugin.getLocalConfig().getTableName(), str);
         }
         plugin.getLogger().info("Sign change : " + str);
+    }
+
+    @EventHandler
+    public void onPlayerInteract(PlayerInteractEvent event){
+        Block block = event.getClickedBlock().getRelative(event.getBlockFace());
+        if(block.getType() == Material.FIRE){
+            // Fire block was broken by player
+            Gson gson = new Gson();
+            // Store block info
+            JsonObject json = new JsonObject();
+            json.addProperty("t", Constants.COMMAND_BLOCK_BREAK);   // type
+            json.addProperty("x", block.getX());                    // x
+            json.addProperty("y", block.getY());                    // y
+            json.addProperty("z", block.getZ());                    // z
+            json.addProperty("n", event.getPlayer().getDisplayName());   // player name
+            String str = gson.toJson(json);
+            try (Jedis jedis = plugin.getMasterPool().getResource()) {
+                jedis.rpush(plugin.getLocalConfig().getTableName(), str);
+            }
+            plugin.getLogger().info("Block break : " + str);
+        }
     }
 
     private JsonObject getOptional(Block block, int type) {
