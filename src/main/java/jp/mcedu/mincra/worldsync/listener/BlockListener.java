@@ -110,9 +110,12 @@ public class BlockListener implements Listener {
     }
 
     @EventHandler
-    public void onPlayerInteract(PlayerInteractEvent event){
+    public void onPlayerInteract(PlayerInteractEvent event) {
+        if (event.getClickedBlock() == null) {
+            return;
+        }
         Block block = event.getClickedBlock().getRelative(event.getBlockFace());
-        if(block.getType() == Material.FIRE){
+        if (block.getType() == Material.FIRE) {
             // Fire block was broken by player
             Gson gson = new Gson();
             // Store block info
