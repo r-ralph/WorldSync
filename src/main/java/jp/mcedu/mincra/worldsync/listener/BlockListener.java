@@ -27,6 +27,8 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.SignChangeEvent;
+import org.bukkit.event.player.PlayerBucketEmptyEvent;
+import org.bukkit.event.player.PlayerBucketFillEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import redis.clients.jedis.Jedis;
 
@@ -131,6 +133,48 @@ public class BlockListener implements Listener {
             }
             plugin.getLogger().info("Block break : " + str);
         }
+    }
+
+    @EventHandler
+    public void onPlayerBucketEmpty(PlayerBucketEmptyEvent event) {
+        // 設置
+        Block block = event.getBlockClicked().getRelative(event.getBlockFace());
+        int type = event.getBucket() == Material.WATER_BUCKET ? Material.WATER.ordinal() : Material.LAVA.ordinal();
+        Gson gson = new Gson();
+        // Store block info
+        JsonObject json = new JsonObject();
+        json.addProperty("t", Constants.COMMAND_BLOCK_PLACE);   // type
+        json.addProperty("x", block.getX());                    // x
+        json.addProperty("y", block.getY());                    // y
+        json.addProperty("z", block.getZ());                    // z
+        json.addProperty("m", type);                            // material
+        //noinspection deprecation
+        json.addProperty("d", 0); // metadata
+        json.addProperty("n", event.getPlayer().getDisplayName());   // player name
+        String str = gson.toJson(json);
+        try (Jedis jedis = plugin.getMasterPool().getResource()) {
+            jedis.rpush(plugin.getLocalConfig().getTableName(), str);
+        }
+        plugin.getLogger().info("Block place : " + str);
+    }
+
+    @EventHandler
+    public void onPlayerBucketFill(PlayerBucketFillEvent event) {
+        // 除去
+        Block block = event.getBlockClicked().getRelative(event.getBlockFace());
+        Gson gson = new Gson();
+        // Store block info
+        JsonObject json = new JsonObject();
+        json.addProperty("t", Constants.COMMAND_BLOCK_BREAK);   // type
+        json.addProperty("x", block.getX());                    // x
+        json.addProperty("y", block.getY());                    // y
+        json.addProperty("z", block.getZ());                    // z
+        json.addProperty("n", event.getPlayer().getDisplayName());   // player name
+        String str = gson.toJson(json);
+        try (Jedis jedis = plugin.getMasterPool().getResource()) {
+            jedis.rpush(plugin.getLocalConfig().getTableName(), str);
+        }
+        plugin.getLogger().info("Block break : " + str);
     }
 
     private JsonObject getOptional(Block block, int type) {
