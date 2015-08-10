@@ -39,7 +39,7 @@ public class WorldApply implements Runnable {
 
     @Override
     public void run() {
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 1000; i++) {
             JsonObject data = plugin.getQueue().poll();
             if (data == null) {
                 return;
